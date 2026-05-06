@@ -49,6 +49,38 @@ async def list_models() -> dict:
     }
 
 
+_SEGMENT_DEFAULTS = {
+    "seek": 0,
+    "temperature": 0.0,
+    "avg_logprob": 0.0,
+    "compression_ratio": 1.0,
+    "no_speech_prob": 0.0,
+}
+
+
+def _normalize_verbose_json(payload: dict) -> dict:
+    """Reshape whisper.cpp's verbose_json into OpenAI's verbose_json schema.
+
+    whisper.cpp nests word timestamps inside each segment and omits several
+    segment-level metrics; OpenAI exposes words at the top level (with a
+    smaller field set) and requires seek/temperature/avg_logprob/etc.
+    """
+    top_words: list[dict] = []
+    segments_in = payload.get("segments") or []
+    segments_out: list[dict] = []
+    for seg in segments_in:
+        normalized = {**_SEGMENT_DEFAULTS, **seg}
+        for w in normalized.pop("words", []) or []:
+            top_words.append(
+                {"word": w.get("word", ""), "start": w.get("start"), "end": w.get("end")}
+            )
+        segments_out.append(normalized)
+    payload["segments"] = segments_out
+    if top_words:
+        payload["words"] = top_words
+    return payload
+
+
 async def _proxy_inference(
     file: UploadFile,
     response_format: str,
@@ -85,7 +117,10 @@ async def _proxy_inference(
 
     ct = r.headers.get("content-type", "application/json")
     if "json" in ct:
-        return JSONResponse(content=r.json())
+        body = r.json()
+        if response_format == "verbose_json" and isinstance(body, dict):
+            body = _normalize_verbose_json(body)
+        return JSONResponse(content=body)
     return Response(content=r.content, media_type=ct)
 
 
