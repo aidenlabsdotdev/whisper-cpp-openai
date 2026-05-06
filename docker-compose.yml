@@ -1,0 +1,46 @@
+services:
+  whisper:
+    image: ${WHISPER_IMAGE:-ghcr.io/ggml-org/whisper.cpp:main}
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
+      WHISPER_THREADS: ${WHISPER_THREADS:-4}
+      WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-auto}
+    volumes:
+      - whisper-models:/models
+    command:
+      - |
+        set -eu
+        MODEL_FILE="/models/ggml-$$WHISPER_MODEL.bin"
+        if [ ! -f "$$MODEL_FILE" ]; then
+          echo "Downloading model: $$WHISPER_MODEL"
+          /app/models/download-ggml-model.sh "$$WHISPER_MODEL" /models
+        fi
+        exec whisper-server \
+          -m "$$MODEL_FILE" \
+          --host 0.0.0.0 \
+          --port 8080 \
+          -t "$$WHISPER_THREADS" \
+          -l "$$WHISPER_LANGUAGE"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 5m
+    restart: unless-stopped
+
+  shim:
+    build: ./shim
+    environment:
+      WHISPER_URL: http://whisper:8080
+      WHISPER_MODEL_NAME: ${WHISPER_MODEL:-large-v3}
+      SHIM_API_KEY: ${SHIM_API_KEY:-}
+    ports:
+      - "${SHIM_PORT:-8000}:8000"
+    depends_on:
+      whisper:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  whisper-models:
