@@ -30,6 +30,7 @@ services:
     restart: unless-stopped
 
   shim:
+    image: ${SHIM_IMAGE:-ghcr.io/aidenlabsdotdev/whisper-cpp-openai:latest}
     build: ./shim
     environment:
       WHISPER_URL: http://whisper:8080
