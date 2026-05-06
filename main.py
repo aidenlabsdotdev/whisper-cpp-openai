@@ -6,7 +6,7 @@ import httpx
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import JSONResponse, Response
 
-WHISPER_URL = os.getenv("WHISPER_URL", "http://whisper:8080").rstrip("/")
+WHISPER_URL = os.getenv("WHISPER_URL", "http://127.0.0.1:8080").rstrip("/")
 MODEL_NAME = os.getenv("WHISPER_MODEL_NAME", "whisper-1")
 API_KEY = os.getenv("SHIM_API_KEY") or None
 REQUEST_TIMEOUT = float(os.getenv("REQUEST_TIMEOUT", "600"))

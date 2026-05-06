@@ -1,4 +1,4 @@
-name: Publish shim image
+name: Publish image
 
 on:
   push:
@@ -31,15 +31,18 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository }}
+          # All-in-one image: whisper-server (compiled for Sapphire Rapids /
+          # AMX) + Python shim. Tags include main-amx to make the AMX
+          # requirement explicit at the deploy site.
           tags: |
             type=ref,event=branch
             type=ref,event=tag
             type=sha,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=main-amx,enable={{is_default_branch}}
 
       - uses: docker/build-push-action@v6
         with:
-          context: ./shim
+          context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

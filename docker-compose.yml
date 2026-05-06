@@ -1,33 +1,23 @@
 services:
-  whisper:
-    image: ${WHISPER_IMAGE:-ghcr.io/aidenlabsdotdev/whisper.cpp:main-amx}
-    build: ./whisper
+  whisper-cpp-openai:
+    image: ${IMAGE:-ghcr.io/aidenlabsdotdev/whisper-cpp-openai:main-amx}
+    build: .
     environment:
       WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
       WHISPER_THREADS: ${WHISPER_THREADS:-4}
       WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-auto}
+      WHISPER_MODEL_NAME: ${WHISPER_MODEL_NAME:-${WHISPER_MODEL:-large-v3}}
+      SHIM_API_KEY: ${SHIM_API_KEY:-}
     volumes:
       - whisper-models:/models
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/"]
-      interval: 5s
-      timeout: 5s
-      retries: 60
-      start_period: 5m
-    restart: unless-stopped
-
-  shim:
-    image: ${SHIM_IMAGE:-ghcr.io/aidenlabsdotdev/whisper-cpp-openai:latest}
-    build: ./shim
-    environment:
-      WHISPER_URL: http://whisper:8080
-      WHISPER_MODEL_NAME: ${WHISPER_MODEL:-large-v3}
-      SHIM_API_KEY: ${SHIM_API_KEY:-}
     ports:
-      - "${SHIM_PORT:-8000}:8000"
-    depends_on:
-      whisper:
-        condition: service_healthy
+      - "${HOST_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 5m
     restart: unless-stopped
 
 volumes:

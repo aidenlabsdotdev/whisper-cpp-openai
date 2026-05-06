@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>whisper-cpp-openai</Name>
+  <Repository>ghcr.io/aidenlabsdotdev/whisper-cpp-openai:main-amx</Repository>
+  <Registry>https://github.com/aidenlabsdotdev/whisper-cpp-openai</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/aidenlabsdotdev/whisper-cpp-openai/issues</Support>
+  <Project>https://github.com/aidenlabsdotdev/whisper-cpp-openai</Project>
+  <ReadMe/>
+  <Overview>All-in-one OpenAI-compatible Whisper transcription server. Runs whisper.cpp's whisper-server (compiled for Sapphire Rapids — AMX_INT8/BF16 kernels) and the FastAPI shim under tini supervision in a single container. Endpoints: POST /v1/audio/transcriptions, POST /v1/audio/translations, GET /v1/models. Returns OpenAI-shape responses including a normalized verbose_json. Model auto-downloads to the configured volume on first start.</Overview>
+  <Category>AI: Tools:Utilities</Category>
+  <WebUI>http://[IP]:[PORT:17999]/v1/models</WebUI>
+  <TemplateURL/>
+  <Icon>https://avatars.githubusercontent.com/u/14957082?s=200&amp;v=4</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>1778049600</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>AMX-capable CPU (Sapphire Rapids or Granite Rapids — Xeon 6xxx). Will SIGILL on older CPUs.</Requires>
+  <Config Name="API" Target="8000" Default="17999" Mode="tcp" Description="OpenAI-compatible HTTP port." Type="Port" Display="always" Required="true" Mask="false">17999</Config>
+  <Config Name="Models" Target="/models" Default="/mnt/primary/appdata/whisper-cpp-openai/models" Mode="rw" Description="Where ggml whisper models are cached. ~3GB per model. Persists across restarts." Type="Path" Display="always" Required="true" Mask="false">/mnt/primary/appdata/whisper-cpp-openai/models</Config>
+  <Config Name="WHISPER_MODEL" Target="WHISPER_MODEL" Default="large-v3" Mode="" Description="ggml model. Options: tiny, base, small, medium, large-v1, large-v2, large-v3, large-v3-turbo (and *.en variants)." Type="Variable" Display="always" Required="true" Mask="false">large-v3</Config>
+  <Config Name="WHISPER_THREADS" Target="WHISPER_THREADS" Default="16" Mode="" Description="Threads per inference. With AMX, returns diminish past ~8-16 threads." Type="Variable" Display="always" Required="true" Mask="false">16</Config>
+  <Config Name="WHISPER_LANGUAGE" Target="WHISPER_LANGUAGE" Default="auto" Mode="" Description="Default language; auto = detect per request." Type="Variable" Display="advanced" Required="false" Mask="false">auto</Config>
+  <Config Name="WHISPER_MODEL_NAME" Target="WHISPER_MODEL_NAME" Default="" Mode="" Description="What this server advertises in /v1/models. Leave blank to use WHISPER_MODEL value." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="SHIM_API_KEY" Target="SHIM_API_KEY" Default="" Mode="" Description="If set, requires Authorization: Bearer &lt;key&gt; on every request. Empty = open." Type="Variable" Display="always" Required="false" Mask="true"></Config>
+</Container>
