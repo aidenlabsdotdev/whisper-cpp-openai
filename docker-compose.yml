@@ -1,26 +1,13 @@
 services:
   whisper:
-    image: ${WHISPER_IMAGE:-ghcr.io/ggml-org/whisper.cpp:main}
+    image: ${WHISPER_IMAGE:-ghcr.io/aidenlabsdotdev/whisper.cpp:main-amx}
+    build: ./whisper
     environment:
       WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
       WHISPER_THREADS: ${WHISPER_THREADS:-4}
       WHISPER_LANGUAGE: ${WHISPER_LANGUAGE:-auto}
     volumes:
       - whisper-models:/models
-    command:
-      - |
-        set -eu
-        MODEL_FILE="/models/ggml-$$WHISPER_MODEL.bin"
-        if [ ! -f "$$MODEL_FILE" ]; then
-          echo "Downloading model: $$WHISPER_MODEL"
-          /app/models/download-ggml-model.sh "$$WHISPER_MODEL" /models
-        fi
-        exec whisper-server \
-          -m "$$MODEL_FILE" \
-          --host 0.0.0.0 \
-          --port 8080 \
-          -t "$$WHISPER_THREADS" \
-          -l "$$WHISPER_LANGUAGE"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/"]
       interval: 5s
