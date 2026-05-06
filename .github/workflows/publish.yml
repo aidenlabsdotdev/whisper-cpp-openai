@@ -32,12 +32,10 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           # All-in-one image: whisper-server (compiled for Sapphire Rapids /
-          # AMX) + Python shim. Tags include main-amx to make the AMX
-          # requirement explicit at the deploy site.
+          # AMX) + Python shim. Single tag — :main-amx — keeps the package
+          # listing clean and makes the AMX requirement explicit. Add other
+          # tags here later if other ISA variants get published.
           tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=sha,format=short
             type=raw,value=main-amx,enable={{is_default_branch}}
 
       - uses: docker/build-push-action@v6
