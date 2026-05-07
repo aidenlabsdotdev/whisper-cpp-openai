@@ -44,5 +44,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          # Skip the OCI index, provenance, and SBOM attestations — they
+          # show up as separate untagged versions in GHCR's package
+          # listing. For a single-platform build we want one tagged image.
+          provenance: false
+          sbom: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
